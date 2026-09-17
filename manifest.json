@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Hatebu Domain Filter",
+  "version": "1.0.0",
+  "description": "はてなブックマークの一覧から、登録したドメインの記事を非表示にします。",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "はてブ ドメイン非表示の設定を開く",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_page": "src/options/options.html",
+  "background": {
+    "service_worker": "src/scripts/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://b.hatena.ne.jp/*"],
+      "js": ["src/lib/domainStore.js", "src/scripts/content.js"],
+      "css": ["src/scripts/content.css"],
+      "run_at": "document_start"
+    }
+  ],
+  "permissions": ["storage"],
+  "host_permissions": ["*://b.hatena.ne.jp/*"]
+}

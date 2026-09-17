@@ -1,0 +1,24 @@
+# Editors / IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+._*
+
+# Chrome/Firefox extension packaging output
+*.zip
+*.crx
+*.xpi
+*.pem
+
+# Node tooling (if introduced later)
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Env / secrets
+.env
+.env.local

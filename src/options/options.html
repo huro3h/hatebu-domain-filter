@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>はてブ ドメイン非表示 の設定</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <main class="page">
+    <header class="page-header">
+      <h1>はてブ ドメイン非表示</h1>
+      <label class="switch">
+        <input type="checkbox" id="enabled">
+        <span class="switch-track" aria-hidden="true"></span>
+        <span class="switch-label" id="enabled-label">有効</span>
+      </label>
+    </header>
+
+    <p class="lead">
+      ここに登録したドメインの記事を、はてなブックマーク(b.hatena.ne.jp)の一覧から非表示にします。
+      一覧の記事にマウスを乗せると、ドメイン名の横に「非表示」ボタンが出ます。
+    </p>
+
+    <section class="card">
+      <h2>ドメインを追加</h2>
+      <form id="add-form" class="add-form" autocomplete="off">
+        <input type="text" id="add-input" placeholder="example.com" aria-label="追加するドメイン" spellcheck="false">
+        <button type="submit">追加</button>
+      </form>
+      <p class="hint">URLを貼り付けてもドメイン部分だけを取り出します。サブドメインは区別されます(<code>example.com</code> を登録しても <code>news.example.com</code> は消えません)。</p>
+      <p class="message" id="add-message" role="status"></p>
+    </section>
+
+    <section class="card">
+      <h2>非表示にしているドメイン <span class="count" id="count"></span></h2>
+      <ul class="domain-list" id="domain-list"></ul>
+      <p class="empty" id="empty">まだ登録されていません。</p>
+    </section>
+
+    <section class="card">
+      <h2>一括編集</h2>
+      <p class="hint">1行に1ドメイン。ここでの編集がそのままリストになります(バックアップしたいときはコピーして保存してください)。<code>#</code> で始まる行はコメントとして無視します。</p>
+      <textarea id="bulk" rows="8" spellcheck="false" aria-label="ドメインの一括編集"></textarea>
+      <div class="bulk-actions">
+        <button type="button" id="bulk-apply">この内容を反映</button>
+        <button type="button" id="bulk-reset" class="secondary">編集を取り消す</button>
+        <span class="message" id="bulk-message" role="status"></span>
+      </div>
+    </section>
+  </main>
+
+  <script src="../lib/domainStore.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>
