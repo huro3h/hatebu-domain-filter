@@ -10,9 +10,9 @@
  *   NODE_PATH=/tmp/scratch/node_modules node test/e2e.js
  */
 const { chromium } = require('playwright');
+const { launchBackground } = require('./background-browser.js');
 const os = require('os'), path = require('path'), fs = require('fs');
 
-const BRAVE = '/Applications/Brave Browser Nightly.app/Contents/MacOS/Brave Browser Nightly';
 const EXT = path.resolve(__dirname, '..');
 
 const results = [];
@@ -29,13 +29,13 @@ const hiddenState = (page, domain) =>
 
 (async () => {
   const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'hdf-e2e-'));
-  const context = await chromium.launchPersistentContext(userDataDir, {
-    executablePath: BRAVE,
-    headless: false,
-    args: [`--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`],
-  });
+  // ブラウザは裏で起動し、作業中のアプリから前面を奪わない (background-browser.js を参照)。
+  const browser = await launchBackground(chromium, { extension: EXT, userDataDir });
+  const { context } = browser;
+  // ページも裏の窓に1枚ずつ開く。内寸は Playwright の既定ビューポートと同じ 1280×720。
+  const openPage = () => browser.openPage('about:blank', { width: 1280, height: 720 });
 
-  const page = await context.newPage();
+  const page = await openPage();
   page.setDefaultTimeout(60000);
   await page.goto('https://b.hatena.ne.jp/hotentry/all', { waitUntil: 'domcontentloaded', timeout: 90000 });
   // `li.entrylist-image-entry` is also used by empty ad placeholders
@@ -87,7 +87,7 @@ const hiddenState = (page, domain) =>
   const extId = sw ? new URL(sw.url()).host : null;
   check('service worker is running', !!extId, extId);
 
-  const optionsPage = await context.newPage();
+  const optionsPage = await openPage();
   await optionsPage.goto(`chrome-extension://${extId}/src/options/options.html`);
   await optionsPage.waitForSelector('#domain-list li', { timeout: 10000 });
   const listed = await optionsPage.evaluate(() => [...document.querySelectorAll('.domain-value')].map((e) => e.textContent));
@@ -103,7 +103,7 @@ const hiddenState = (page, domain) =>
   check('options: a pasted URL is normalized to a hostname', true, 'www.example.com');
 
   // Search results use the other layout (li.bookmark-item > .centerarticle-entry).
-  const searchPage = await context.newPage();
+  const searchPage = await openPage();
   await searchPage.goto(`https://b.hatena.ne.jp/search/text?q=${encodeURIComponent(target.domain.split('.')[0])}`,
     { waitUntil: 'domcontentloaded', timeout: 90000 });
   await searchPage.waitForSelector('li.bookmark-item', { timeout: 60000 }).catch(() => {});
@@ -116,7 +116,7 @@ const hiddenState = (page, domain) =>
     searchInfo.ofDomain === 0 || searchInfo.ofDomain === searchInfo.hidden, JSON.stringify(searchInfo));
 
   // "/site/<host>/" is that domain's own listing and is deliberately exempt.
-  const sitePage = await context.newPage();
+  const sitePage = await openPage();
   await sitePage.goto(`https://b.hatena.ne.jp/site/${target.domain}/`, { waitUntil: 'domcontentloaded', timeout: 90000 });
   await sitePage.waitForSelector('.entrylist-contents', { timeout: 60000 }).catch(() => {});
   const siteInfo = await sitePage.evaluate(() => {
@@ -127,7 +127,6 @@ const hiddenState = (page, domain) =>
 
   // Global toggle: the checkbox is visually replaced by .switch-track, so
   // click the track rather than the (0-sized) input.
-  await optionsPage.bringToFront();
   const badgeOn = await sw.evaluate(() => chrome.action.getBadgeText({}));
   await optionsPage.click('.switch-track');
   await page.waitForTimeout(800);
@@ -143,14 +142,13 @@ const hiddenState = (page, domain) =>
 
   // Removing a domain must un-hide live, without a reload.
   await optionsPage.locator(`#domain-list li:has(.domain-value:text-is("${target.domain}")) .remove`).click();
-  await page.bringToFront();
   await page.waitForFunction(
     (d) => [...document.querySelectorAll('.hdf-card')].filter((c) => c.querySelector(`a[href^="/site/${d}/"]`)).every((c) => getComputedStyle(c).display !== 'none'),
     target.domain, { timeout: 10000 }
   ).then(() => check('removing a domain un-hides its cards live', true))
    .catch((e) => check('removing a domain un-hides its cards live', false, String(e).slice(0, 120)));
 
-  await context.close();
+  await browser.close();
 
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} checks passed`);
