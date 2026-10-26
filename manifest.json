@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Hatebu Domain Filter",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "はてなブックマークの一覧から、登録したドメインの記事を非表示にします。",
   "icons": {
     "16": "icons/icon16.png",

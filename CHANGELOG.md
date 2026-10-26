@@ -10,6 +10,12 @@
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-26
+
+### Changed
+
+- E2Eテストのブラウザを裏で起動し、テスト中に前面へ出ないようにした。拡張機能本体の動作は変わらない
+
 ## [1.0.0] - 2026-09-17
 
 ### Added
@@ -18,5 +24,6 @@
 - **設定画面**: 登録済みドメインの一覧・追加・削除、1行1ドメインの一括編集、拡張機能全体のON/OFF切り替え。URLを貼り付けた場合もドメイン部分だけを取り出して登録する。
 - **ツールバーアイコン**: クリックで設定画面を開く。バッジに登録件数を表示し、OFFのときはアイコンをグレーにする。
 
-[Unreleased]: https://github.com/huro3h/hatebu-domain-filter/compare/1.0.0...HEAD
+[Unreleased]: https://github.com/huro3h/hatebu-domain-filter/compare/1.0.1...HEAD
+[1.0.1]: https://github.com/huro3h/hatebu-domain-filter/compare/1.0.0...1.0.1
 [1.0.0]: https://github.com/huro3h/hatebu-domain-filter/releases/tag/1.0.0
